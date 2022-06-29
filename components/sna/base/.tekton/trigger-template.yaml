@@ -1,0 +1,50 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  creationTimestamp: null
+  name: sna
+  namespace: ralphjbean
+spec:
+  params:
+  - name: git-revision
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        build.appstudio.openshift.io/application: sna
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: sna
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      creationTimestamp: null
+      generateName: sna-
+      labels:
+        build.appstudio.openshift.io/application: sna
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: sna
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      namespace: ralphjbean
+    spec:
+      params:
+      - name: git-url
+        value: https://github.com/jduimovich/single-nodejs-app
+      - name: output-image
+        value: quay.io/redhat-appstudio/user-workload:ralphjbean-sna-$(tt.params.git-revision)
+      - name: dockerfile
+        value: docker/Dockerfile
+      - name: path-context
+        value: .
+      pipelineRef:
+        bundle: quay.io/redhat-appstudio/hacbs-templates-bundle:latest
+        name: docker-build
+      workspaces:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: appstudio
+        subPath: sna/$(tt.params.git-revision)
+    status: {}
+status: {}
